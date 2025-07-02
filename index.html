@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Contatos Condôminos Rita Monteiro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #fff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      background-color: #00796b;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+    .container {
+      max-width: 480px;
+      margin: 40px;
+      margin-top: 120px; /* Espaço para o header */
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box; /* Garante que o padding não aumente a largura */
+    }
+    button {
+      background-color: #00796b;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #004d40;
+    }
+    #resultado {
+      margin-top: 20px;
+      font-weight: bold;
+      min-height: 50px; /* Evita que o layout "pule" */
+      word-wrap: break-word; /* Garante que o email não quebre o layout */
+    }
+    .email-link {
+      color: #00796b;
+      text-decoration: none;
+    }
+    .email-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<header>Contatos Condôminos Rita Monteiro</header>
+
+<div class="container">
+  <h3>Consulta de Email por CPF</h3>
+  <input type="text" id="cpfInput" placeholder="Digite o CPF (somente números)">
+  <button id="consultaBtn" onclick="consultar()">Consultar</button>
+  <div id="resultado"></div>
+</div>
+
+<script>
+  // Função para consultar o CPF no servidor seguro
+  async function consultar() {
+    const cpfInput = document.getElementById('cpfInput');
+    const resultadoDiv = document.getElementById('resultado');
+    const consultaBtn = document.getElementById('consultaBtn');
+    const cpf = cpfInput.value.replace(/\D/g, '').trim();
+
+    if (!cpf) {
+      resultadoDiv.innerHTML = `<p style="color:orange;">Por favor, digite um CPF válido.</p>`;
+      return;
+    }
+
+    // Desabilita o botão e mostra mensagem de carregando
+    consultaBtn.disabled = true;
+    consultaBtn.textContent = 'Consultando...';
+    resultadoDiv.innerHTML = '';
+
+    try {
+      // 1. O JavaScript envia APENAS o CPF para o nosso servidor seguro.
+      // A URL '/api/consultar' é um caminho especial que o Vercel/Netlify entende.
+      const response = await fetch(`/api/consultar?cpf=${cpf}`);
+
+      // 2. Recebemos a resposta do servidor.
+      const data = await response.json();
+
+      // 3. Verificamos se a resposta foi bem-sucedida (status 200 OK)
+      if (response.ok) {
+        resultadoDiv.innerHTML = `<p style="color:green;">CPF localizado!<br>Email: <strong>${data.email}</strong></p>`;
+      } else {
+        // Se o servidor respondeu com um erro (ex: 404 Not Found)
+        resultadoDiv.innerHTML = `<p style="color:red;">CPF não encontrado. Se seus dados não constam em nossa base, por favor, envie um e-mail para <a href="mailto:cadastro@seuemail.com" class="email-link">cadastro@seuemail.com</a> para se cadastrar.</p>`;
+      }
+    } catch (error) {
+      // Caso ocorra um erro de rede ou o servidor esteja fora do ar
+      console.error('Erro na consulta:', error);
+      resultadoDiv.innerHTML = `<p style="color:red;">Ocorreu um erro na comunicação. Tente novamente mais tarde.</p>`;
+    } finally {
+      // Reabilita o botão ao final da consulta
+      consultaBtn.disabled = false;
+      consultaBtn.textContent = 'Consultar';
+    }
+  }
+
+  // Permite que o usuário pressione "Enter" no campo de CPF para fazer a busca
+  document.getElementById('cpfInput').addEventListener('keyup', function(event) {
+    if (event.key === 'Enter') {
+      consultar();
+    }
+  });
+</script>
+
+</body>
+</html>
